@@ -1,15 +1,37 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+// import Chart from './Chart';
 
 function App() {
+  const [weatherData, setWeatherData] = useState(null);
+  const [chartData, setChartData] = useState({});
   const [data, setData] = useState({});
-  const url = `https://api.openweathermap.org/data/2.5/onecall?lat=40.58725980318928&lon=22.948223362612612&exclude=hourly,minutely&appid=11b0499bd13ab56063de7565a440eb97&units=metric`;
+  const url = `https://api.openweathermap.org/data/2.5/onecall?lat=	40.63666412&lon=22.942162898&exclude=hourly,minutely&appid=11b0499bd13ab56063de7565a440eb97&units=metric`;
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await axios.get(url);
         setData(response.data);
+        const labels = ["Today"];
+        const temperatures = [response.data.current.temp];
+        for (let i = 1; i <= 6; i++) {
+          const date = new Date(response.data.daily[i].dt * 1000);
+          labels.push(date.toLocaleDateString("en-US", { weekday: "short" }));
+          temperatures.push(response.data.daily[i].temp.max);
+        }
+        setChartData({
+          labels: labels,
+          datasets: [
+            {
+              label: "Max Temperature",
+              data: temperatures,
+              fill: false,
+              borderColor: "rgba(255, 99, 132, 1)",
+              borderWidth: 2,
+            },
+          ],
+        });
       } catch (error) {
         console.error("Error fetching weather data:", error);
       }
@@ -17,6 +39,8 @@ function App() {
 
     fetchData();
   }, [url]);
+
+  //40.63666412 22.942162898
 
   return (
     <div className="app">
@@ -70,6 +94,7 @@ function App() {
             </div>
           </div>
         )}
+        {/* {chartData && <Chart chartData={chartData} />}  */}
       </div>
     </div>
   );
